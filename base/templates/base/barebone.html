@@ -1,0 +1,15 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="{% static 'base.css' %}" />
+    <script type="application/javascript" src="{% static 'jquery-3.3.1.min.js' %}" >1;</script>
+    <script type="application/javascript" src="{% static 'base.js' %}" >1;</script>
+    <title>{% block title %}{% endblock %} - DeployManager</title>
+</head>
+<body>
+    {% block body %}
+    {% endblock %}
+</body>
+</html>
