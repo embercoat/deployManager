@@ -13,12 +13,4 @@ function deploy(artifact, appServer){
         contentType: "application/json"
     });
 }
-function undeploy(deployment){
-    $.ajax({
-        url : "/api/deploy/undeploy",
-        type: "POST",
-        dataType : "json",
-        data : '{"deployment" : '+deployment+'}',
-        contentType: "application/json"
-    });
-}
+

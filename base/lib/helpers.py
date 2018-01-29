@@ -16,8 +16,15 @@ class GAV():
         self.artifactId = artifactId
         self.version    = version
 
-def bytesToString(b64):
+def base64ToString(b64):
     bytes = base64.b64decode(b64)
+    string = ""
+    for b in bytes:
+        string = string + "{0:02x}".format(b)
+
+    return string
+
+def bytesToString(bytes):
     string = ""
     for b in bytes:
         string = string + "{0:02x}".format(b)

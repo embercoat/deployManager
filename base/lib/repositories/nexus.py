@@ -5,8 +5,8 @@ import requests
 from requests.auth import HTTPBasicAuth
 from requests.cookies import RequestsCookieJar
 
-from base.lib.helpers import GAV
 from base.lib.artifactrepository import ArtifactRepository
+
 
 class RepoNexus(ArtifactRepository):
 
@@ -14,8 +14,8 @@ class RepoNexus(ArtifactRepository):
         "findBySHA1" : "/service/local/lucene/search?sha1={}",
         "singleUseToken" : "/service/siesta/wonderland/authenticate",
         "login" : "/service/local/authentication/login",
-        "findByGAV" : "/service/local/lucene/search?g={}&a={}&v={}",
-        "getArtifact" : "/service/local/artifact/maven/redirect?r={}&g={}&a={}&v={}&e=war",
+        "findByCoordinates" : "/service/local/lucene/search?g={}&a={}&v={}",
+        "getArtifact" : "/service/local/artifact/maven/redirect?r={}&g={}&a={}&v={}&e={}",
     }
     _extensions = [ "ear", "war" ]
 
@@ -56,30 +56,69 @@ class RepoNexus(ArtifactRepository):
 
         return response
 
-    def getArtifact(self, gav):
-        repo = self.findRepoByCoordinates(gav)
-        artifact = self._invoke(self.url + self._urls["getArtifact"].format(repo, gav.groupId, gav.artifactId, gav.version))
-        return artifact.content
+    def getArtifact(self, artifact):
+        repo = self.findRepoByCoordinates(artifact)
+        artifactResponse = self._invoke(
+                                self.url + self._urls["getArtifact"].format(
+                                    repo,
+                                    artifact.groupid,
+                                    artifact.artifactid,
+                                    artifact.version,
+                                    artifact.extension
+                                ))
+        return artifactResponse.content
 
-    def findVersions(self, gav):
-        json = self._invoke(self.url + self._urls["findByGAV"].format(gav.groupId, gav.artifactId, "")).json()
+    def findVersions(self, artifact):
+        json = self._invoke(self.url + self._urls["findByCoordinates"].format(artifact.groupid, artifact.artifactid, "")).json()
         versions = { "latest" : "0.0.0", "versions" : []}
 
         for release in json["data"]:
             if not versions["latest"] or StrictVersion(release['latestRelease']) > StrictVersion(versions["latest"]):
                 versions["latest"] = release["latestRelease"]
 
-            if StrictVersion(release['version']) > StrictVersion(gav.version):
+            if StrictVersion(release['version']) > StrictVersion(artifact.version):
                 versions["versions"].append(release["version"])
         return versions
 
 
-    def findRepoByCoordinates(self, gav):
-        response = self._invoke(self.url + self._urls["findByGAV"].format(gav.groupId, gav.artifactId, gav.version))
+    def findRepoByCoordinates(self, artifact):
+        response = self._invoke(self.url + self._urls["findByCoordinates"].format(artifact.groupid, artifact.artifactid, artifact.version))
         return response.json()["repoDetails"][0]["repositoryId"]
 
-    def findBySHA1(self, sha1):
+    def findArtifactByCoordinates(self, groupId, artifactId, version=''):
+        response = self._invoke(self.url + self._urls["findByCoordinates"].format(groupId, artifactId, version))
+
+        artifactCollection = []
+        for artifact in response.json()['data']:
+            artifactCollection.append(
+                {
+                    "groupid" : artifact["groupId"],
+                    "artifactid" : artifact["artifactId"],
+                    "version" : artifact["version"],
+                    "extension" : self._findExtension(artifact['artifactHits'])
+                }
+            )
+
+        return artifactCollection
+
+    def _findExtension(self, artifactHit):
+        extension = ""
+        for link in artifactHit[0]['artifactLinks']:
+            if not link['extension'] == 'pom' and 'classifier' not in link:
+                extension = link['extension']
+
+        return extension
+
+    def findArtifactBySHA1(self, sha1):
         response = self._invoke(self.url + self._urls["findBySHA1"].format(sha1))
         json = response.json()['data'][0]
-        return GAV(json["groupId"], json["artifactId"], json["version"])
+        extension = ""
+        for hit in json["artifactHits"]:
+            extension = self._findExtension(hit)
 
+        return {
+                  "groupId" : json["groupId"],
+                  "artifactId" : json["artifactId"],
+                  "version" : json["version"],
+                  "extension" : extension
+               }

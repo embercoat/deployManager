@@ -17,9 +17,9 @@
             <td>{{ d.artifact.groupid }}</td>
             <td>{{ d.artifact.artifactid }}</td>
             <td>{{ d.artifact.version }}</td>
-            <td><a href="javascript:undeploy({{ d.pk }})">Undeploy</a>
+            <td><a href="javascript:window.DeployManager.undeploy({{ d.pk }})">Undeploy</a>
                 {% for nv in d.artifact.getNewerVersions %}
-                    <a href="javascript:deploy({{ nv.pk }}, {{ applicationServer.pk }})">{{ nv.version }}</a>
+                    <a href="javascript:window.DeployManager.deploy({{ nv.pk }}, {{ applicationServer.pk }})">{{ nv.version }}</a>
                 {% endfor %}
             </td>
         </tr>

@@ -23,11 +23,9 @@ for c in ApplicationServerAbstract.__subclasses__():
 
 
 class Repository(models.Model):
+
     def __str__(self):
         return self.name
-
-    def getClient(self):
-        return import_string(self.type)(self.url, self.username, self.password)
 
     url = models.URLField(help_text="schema://adress:port/(path)")
     name = models.CharField(max_length=40)
@@ -36,17 +34,13 @@ class Repository(models.Model):
     type = models.CharField(max_length=50, choices=repoProviders)
     lastScanned = models.DateTimeField(auto_now=True)
 
-
     class Meta:
         ordering = ("name", )
 
-class ApplicationServer(models.Model):
-
-    def __str__(self):
-        return self.name
-
     def getClient(self):
         return import_string(self.type)(self.url, self.username, self.password)
+
+class ApplicationServer(models.Model):
 
     url = models.URLField(help_text="schema://adress:port/(path)")
     name = models.CharField(max_length=40)
@@ -55,10 +49,14 @@ class ApplicationServer(models.Model):
     type = models.CharField(max_length=50, choices=applicationServers)
     lastScanned = models.DateTimeField(auto_now=True)
 
-
     class Meta:
         ordering = ("name", )
 
+    def __str__(self):
+        return self.name
+
+    def getClient(self):
+        return import_string(self.type)(self.url, self.username, self.password)
 
 class Artifact(models.Model):
 
@@ -69,21 +67,14 @@ class Artifact(models.Model):
     groupid = models.CharField(max_length=50)
     artifactid = models.CharField(max_length=50)
     version = models.CharField(max_length=50)
+    extension = models.CharField(max_length=10)
     sha1 = models.CharField(max_length=40)
 
-    def fromGAV(self, gav):
-        self.groupid = gav.groupId
-        self.artifactid = gav.artifactId
-        self.version = gav.version
-
     def download(self):
-        return self.repository.getClient().getArtifact(GAV(self.groupid, self.artifactid, self.version))
+        return self.repository.getClient().getArtifact(self)
 
     def runtimeName(self):
         return "{}_{}_{}".format(self.groupid, self.artifactid, self.version)
-
-    def getGAV(self):
-        return GAV(self.groupid, self.artifactid, self.version)
 
     def getNewerVersions(self):
         artis = Artifact.objects.filter(groupid=self.groupid, artifactid=self.artifactid)
@@ -101,10 +92,11 @@ class Deployment(models.Model):
     def __str__(self):
         return "{}:{}:{}".format(self.artifact.groupid, self.artifact.artifactid, self.artifact.version)
 
-    def undeploy(self):
-        return self.applicationServer.getClient().undeploy(self.runtimeName)
-
-    applicationServer = models.ForeignKey(ApplicationServer, on_delete=models.CASCADE)
+    applicationServer = models.ForeignKey(ApplicationServer, on_delete=models.DO_NOTHING)
     artifact = models.ForeignKey(Artifact, on_delete=models.DO_NOTHING)
     runtimeName = models.CharField(max_length=200, null=True)
     detected = models.DateTimeField(default=django.utils.timezone.now)
+
+    def undeploy(self):
+        return self.applicationServer.getClient().undeploy(self.runtimeName)
+

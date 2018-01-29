@@ -12,7 +12,7 @@ class ArtifactRepository():
         self.password = password
 
 
-    def findBySHA1(self, sha1):
+    def findArtifactBySHA1(self, sha1):
         pass
 
     def findByCoordinates(self, groupId, artifactId, version='ALL'):

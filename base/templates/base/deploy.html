@@ -1,0 +1,47 @@
+{% extends 'base/base.html' %}
+
+{% block header %}
+    {% load static %}
+    <script type="application/javascript" src="{% static 'deploy.js' %}">1;</script>
+{% endblock %}
+
+{% block content %}
+<h1>Create Deployment</h1>
+<table>
+<tbody>
+    <tr>
+        <td><label for="groupid">GroupId</label></td>
+        <td><input type="text" name="groupid" id="groupid" /></td>
+    </tr>
+    <tr>
+        <td><label for="artifactid">ArtifactId</label></td>
+        <td><input type="text" name="artifactid" id="artifactid" /></td>
+    </tr>
+    <tr>
+        <td><button id="searchArtifact">Search for artifact</button></td>
+    </tr>
+</tbody>
+</table>
+
+<table>
+    <thead>
+        <tr>
+            <th>Repository</th>
+            <th>GroupId</th>
+            <th>ArtifactId</th>
+            <th>Version</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody id="foundArtifacts">
+    </tbody>
+</table>
+<table>
+    <tbody>
+        <tr>
+            <td>ApplicationServer</td>
+            <td>{{ applicationServers }}</td>
+        </tr>
+    </tbody>
+</table>
+{% endblock %}

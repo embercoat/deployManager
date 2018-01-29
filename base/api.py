@@ -15,6 +15,11 @@ class API(View):
 
     def get(self, request, category, action, object=None):
         response = {}
+        scanner = Scanner()
+        if request.body:
+            body = json.loads(request.body)
+        else:
+            body = {}
         """
             Functions and endpoints
         """
@@ -27,10 +32,23 @@ class API(View):
             return HttpResponseNotFound(json.dumps(response))
 
     def post(self, request, category, action, object=None):
-        body = json.loads(request.body)
+        if request.body:
+            body = json.loads(request.body)
+        else:
+            body = {}
         response = {}
+        scanner = Scanner()
+
+        if category == "search":
+            if action == "artifact":
+                if not hasattr(body, "version"):
+                    body["version"] = ""
+
+                response = {"success": True,
+                 "result" : scanner.searchReposByCoordinates(body['groupid'], body['artifactid'], body["version"])
+                }
+
         if category == "scans":
-            scanner = Scanner()
             if action == "scan":
                 if object:
                     response = scanner.scanAppserver(object)
@@ -49,8 +67,8 @@ class API(View):
                 appServClient = appServ.getClient()
 
                 try:
-                    Deployment.objects.get(artifact=arti)
-                    response = { "success" : False, "message" : "Requested artifact {} already deployed on {}".format(arti, appServ)}
+                    dep = Deployment.objects.get(artifact=arti, applicationServer=appServ)
+                    response = { "success" : False, "message" : "Requested artifact {} already deployed on {}".format(arti, dep.applicationserver)}
                     print("Artifact already deployed. returning without deployment")
                 except:
                     print("Not trying to redeploy current deployment. Continuing")
@@ -59,7 +77,8 @@ class API(View):
                         artifact__in=Artifact.objects.filter(
                             artifactid=arti.artifactid,
                             groupid=arti.groupid
-                        )
+                        ),
+                        applicationServer = appServ
                     )
                     if(len(currentDeployments)):
                         print("There is a known deployment matching what we want to deploy.")
@@ -83,6 +102,7 @@ class API(View):
                     response = {"success": True, "message": "Successfully deployed {} to {}".format(arti, appServ)}
 
             if action == "undeploy":
+                print("trying to undeploy")
                 try:
                     deployment = Deployment.objects.get(pk=body['deployment'])
                     deployment.undeploy()
