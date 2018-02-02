@@ -2,18 +2,23 @@
 
 {% block content %}
 <h1>Application Servers</h1>
-<table>
+<div class="row">
+<div class="col-12">
+<table class="table">
     <thead>
         <tr>
-            <th>Name</th>
-            <th>Url</th>
-            <th>Actions</th>
+            <th scope="col">Name</th>
+            <th scope="col">Url</th>
+            <th scope="col">Actions</th>
         </tr>
     </thead>
     <tbody>
     {% for a in applicationServers %}
         <tr>
-            <td><a href="{% url "appServ" a.pk %}">{{ a }}</a></td>
+            <td>
+                <a href="{% url "appServ" a.pk %}">{{ a }}</a>
+            </td>
+
             <td>{{ a.url }}</td>
             <td>
                 
@@ -22,4 +27,6 @@
     {% endfor %}
     </tbody>
 </table>
+</div>
+</div>
 {% endblock %}

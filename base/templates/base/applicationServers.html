@@ -2,13 +2,13 @@
 
 {% block content %}
 <h1>{{ applicationServer }}</h1>
-<table>
+<table class="table">
     <thead>
         <tr>
-            <th>groupid</th>
-            <th>artifactId</th>
-            <th>version</th>
-            <th>Actions</th>
+            <th scope="col">GroupId</th>
+            <th scope="col">ArtifactId</th>
+            <th scope="col">Version</th>
+            <th scope="col">Actions</th>
         </tr>
     </thead>
     <tbody>
@@ -17,10 +17,19 @@
             <td>{{ d.artifact.groupid }}</td>
             <td>{{ d.artifact.artifactid }}</td>
             <td>{{ d.artifact.version }}</td>
-            <td><a href="javascript:window.DeployManager.undeploy({{ d.pk }})">Undeploy</a>
+            <td>
+                <button class="btn btn-danger" onclick="window.DeployManager.undeploy({{ d.pk }}); location.reload();">Undeploy</button>
+                <div class="dropdown">
+                    <button class="btn btn-outline-info dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Upgrade
+                    </button>
+                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                 {% for nv in d.artifact.getNewerVersions %}
-                    <a href="javascript:window.DeployManager.deploy({{ nv.pk }}, {{ applicationServer.pk }})">{{ nv.version }}</a>
+                        <a class="dropdown-item"  onclick="window.DeployManager.deploy({{ nv.pk }}, {{ applicationServer.pk }}); location.reload();">{{ nv.version }}</a>
                 {% endfor %}
+                    </div>
+                </div>
+
             </td>
         </tr>
     {% endfor %}

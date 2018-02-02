@@ -103,9 +103,15 @@ class RepoNexus(ArtifactRepository):
 
     def _findExtension(self, artifactHit):
         extension = ""
-        for link in artifactHit[0]['artifactLinks']:
-            if not link['extension'] == 'pom' and 'classifier' not in link:
-                extension = link['extension']
+        if isinstance(artifactHit, dict):
+            for link in artifactHit['artifactLinks']:
+                if not link['extension'] == 'pom' and 'classifier' not in link:
+                    extension = link['extension']
+
+        if isinstance(artifactHit, tuple) or isinstance(artifactHit, list):
+            for link in artifactHit[0]['artifactLinks']:
+                if not link['extension'] == 'pom' and 'classifier' not in link:
+                    extension = link['extension']
 
         return extension
 

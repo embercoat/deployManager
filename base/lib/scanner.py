@@ -101,7 +101,7 @@ class Scanner():
                     print("SHA1 not found in any repo")
 
             try:
-                dep = Deployment.objects.get(artifact_id=artifact.pk, applicationServer_id=appServerId)
+                Deployment.objects.get(artifact_id=artifact.pk, applicationServer_id=appServerId)
                 print("Deployment known. Not doing anything")
 
             except Deployment.DoesNotExist:

@@ -80,10 +80,10 @@ WSGI_APPLICATION = 'deployManager.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'USER' : 'deploymgr',
-        'PASSWORD' : 'deploymgr',
-        'HOST' : '192.168.1.80',
-        'NAME': 'deploymgr',
+        'USER' : 'deploymanager',
+        'PASSWORD' : 'deployManager',
+        'HOST' : '192.168.1.2',
+        'NAME': 'deploymanager',
     }
 }
 

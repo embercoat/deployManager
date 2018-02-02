@@ -1,13 +1,20 @@
 {% extends 'base/barebone.html' %}
 
 {% block body %}
-    <div class="sidenav">
-      <a href="{% url 'overview' %}">Overview</a>
-      <a href="{% url 'deploy' %}">Deploy</a>
-      <a href="#">Placeholder</a>
-      <a href="#">Placeholder</a>
-    </div>
-    <div class="content" id="content">
+    <nav id="sidebar">
+
+        <div class="sidebar-header">
+            <h3>DeployManager</h3>
+        </div>
+
+        <!-- Sidebar Links -->
+        <ul class="list-unstyled components">
+            <li><a href="{% url 'overview' %}">Overview</a></li>
+            <li><a href="{% url 'deploy' %}">Deploy</a></li>
+        </ul>
+    </nav>
+
+    <div class="content container" id="content">
     {% block content %}
     {% endblock %}
     </div>

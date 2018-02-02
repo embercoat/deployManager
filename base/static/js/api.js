@@ -2,7 +2,7 @@
 
 window.DeployManager = {
     deploy : function(artifact, appServer){
-        console.log("Deploying "+ artifact + " to server " + appServer);
+        console.debug("Deploying "+ artifact + " to server " + appServer);
         $.ajax({
             url : "/api/deploy/deploy",
             type: "POST",
@@ -12,6 +12,8 @@ window.DeployManager = {
         });
     },
     undeploy : function(deployment){
+        console.debug("Undeploying "+ deployment);
+
         $.ajax({
             url : "/api/deploy/undeploy",
             type: "POST",
@@ -21,6 +23,7 @@ window.DeployManager = {
         });
     },
     search : function(groupid, artifactid, version){
+        console.debug("Searching for "+groupid+":"+artifactid+":"+version);
         version = version || "";
         return $.ajax({
             url : "/api/search/artifact",

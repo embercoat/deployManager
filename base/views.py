@@ -39,14 +39,13 @@ class AppServer(View):
 
 
 class DeployView(View):
-    class AppServForm(forms.Form):
-        appServer = ModelChoiceField(queryset=ApplicationServer.objects.all())
-
-
     def get(self, request):
-        appServForm = self.AppServForm()
+
+        appServers = []
+        for appServ in ApplicationServer.objects.all():
+            appServers.append({"id" : appServ.pk, "name" : appServ.__str__()})
 
         return render(request, "base/deploy.html", {
-                        "applicationServers": appServForm.as_table(),
+                        "applicationServers": appServers,
                      }
         )

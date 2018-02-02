@@ -66,11 +66,11 @@ class API(View):
                 appServ = ApplicationServer.objects.get(pk=body["appServerPK"])
                 appServClient = appServ.getClient()
 
-                try:
-                    dep = Deployment.objects.get(artifact=arti, applicationServer=appServ)
+                dep = Deployment.objects.filter(artifact=arti, applicationServer=appServ)
+                if dep.exists():
                     response = { "success" : False, "message" : "Requested artifact {} already deployed on {}".format(arti, dep.applicationserver)}
                     print("Artifact already deployed. returning without deployment")
-                except:
+                else:
                     print("Not trying to redeploy current deployment. Continuing")
 
                     currentDeployments = Deployment.objects.filter(
@@ -105,8 +105,10 @@ class API(View):
                 print("trying to undeploy")
                 try:
                     deployment = Deployment.objects.get(pk=body['deployment'])
+                    message = "Successfully undeployed {} from {}".format(deployment.artifact, deployment.applicationServer)
                     deployment.undeploy()
                     deployment.delete()
+                    response = {"success": True, "message": message}
                 except:
                     response = {"success": False, "message": "Deployment does not exist"}
 
