@@ -18,14 +18,14 @@
             <td>{{ d.artifact.artifactid }}</td>
             <td>{{ d.artifact.version }}</td>
             <td>
-                <button class="btn btn-danger" onclick="window.DeployManager.undeploy({{ d.pk }}, location.reload);">Undeploy</button>
+                <button class="btn btn-danger" onclick="window.DeployManager.undeploy({{ d.pk }}, reloadPage);">Undeploy</button>
                 <div class="dropdown">
                     <button class="btn btn-outline-info dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     Upgrade
                     </button>
                     <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                 {% for nv in d.artifact.getNewerVersions %}
-                        <a class="dropdown-item"  onclick="window.DeployManager.deploy({{ nv.pk }}, {{ applicationServer.pk }},  location.reload);">{{ nv.version }}</a>
+                        <a class="dropdown-item"  onclick="window.DeployManager.deploy({{ nv.pk }}, {{ applicationServer.pk }}, reloadPage);">{{ nv.version }}</a>
                 {% endfor %}
                     </div>
                 </div>

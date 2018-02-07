@@ -14,6 +14,10 @@ function deploy(artifact, appServer){
     });
 }
 
+function reloadPage(){
+    location.reload();
+}
+
 $(document).ready(function () {
 
     $('#sidebarCollapse').on('click', function () {
@@ -21,3 +25,4 @@ $(document).ready(function () {
     });
 
 });
+

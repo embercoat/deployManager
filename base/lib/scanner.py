@@ -1,4 +1,6 @@
 # coding=utf-8
+import logging
+
 from django.utils import timezone
 from django.utils.module_loading import import_string
 
@@ -7,11 +9,12 @@ from base.lib.helpers import base64ToString, GAV
 
 
 class Scanner():
+    logger = logging.getLogger("base.lib.scanner")
 
     def searchReposBySHA1(self, sha1):
         for repo in Repository.objects.all():
             repoClient = repo.getClient()
-            print("searching for {} in {}".format(sha1, repo.url))
+            self.logger.info("searching for {} in {}".format(sha1, repo.url))
             try:
                 result = repoClient.findArtifactBySHA1(sha1)
                 result['repository'] = repo.pk
@@ -25,7 +28,7 @@ class Scanner():
         result = []
         for repo in Repository.objects.all():
             repoClient = repo.getClient()
-            print("searching for {}:{}:{} in {}".format(groupid, artifactid, version, repo.url))
+            self.logger.info("searching for {}:{}:{} in {}".format(groupid, artifactid, version, repo.url))
             try:
                 artifacts = repoClient.findArtifactByCoordinates(groupid, artifactid, version)
                 for a in artifacts:
@@ -74,19 +77,19 @@ class Scanner():
         appServClient = appServData.getClient()
         deployments = appServClient.getDeployments()
         for deployment in deployments.json()['result']:
-            print(deployment['result']['name'])
+            self.logger.info(deployment['result']['name'])
             sha1 = base64ToString(deployment['result']['content'][0]['hash']['BYTES_VALUE'])
             artifact = Artifact()
             try:
                 artifact = Artifact.objects.get(sha1__iexact=sha1)
-                print("artifact in db. no need to search for it")
+                self.logger.info("artifact in db. no need to search for it")
 
 
             except Artifact.DoesNotExist:
-                print("SHA1 not in db. searching for details")
+                self.logger.info("SHA1 not in db. searching for details")
                 try:
                     result = self.searchReposBySHA1(sha1)
-                    print("Found in {}".format(result['repository']))
+                    self.logger.info("Found in {}".format(result['repository']))
 
                     artifact.repository_id = result['repository']
                     artifact.extension = result['extension']
@@ -98,14 +101,14 @@ class Scanner():
 
 
                 except FileNotFoundError:
-                    print("SHA1 not found in any repo")
+                    self.logger.info("SHA1 not found in any repo")
 
             try:
                 Deployment.objects.get(artifact_id=artifact.pk, applicationServer_id=appServerId)
-                print("Deployment known. Not doing anything")
+                self.logger.info("Deployment known. Not doing anything")
 
             except Deployment.DoesNotExist:
-                print("Deployment not known. Adding")
+                self.logger.info("Deployment not known. Adding")
                 dep = Deployment(
                     artifact_id=artifact.pk,
                     applicationServer_id=appServerId,
@@ -115,15 +118,15 @@ class Scanner():
                 dep.save()
         # Touch the databse object to update the timestamp
         appServData.save()
-        print("Scanned {}".format(appServData))
+        self.logger.info("Scanned {}".format(appServData))
 
         return {"success": True, "message": "scanned {}".format(appServData.name)}
 
     def scanAllAppservers(self):
         appServData = ApplicationServer.objects.all()
-        print("Scanning All")
+        self.logger.info("Scanning All")
         for asd in appServData:
-            print("Scanning {}".format(asd.name))
+            self.logger.info("Scanning {}".format(asd.name))
             self.scanAppserver(asd.pk)
 
         return { "success" : True, "message": "scanned all the things"}
@@ -132,19 +135,19 @@ class Scanner():
         repos = Repository.objects.all()
         knownArtifacts = Artifact.objects.all()
         for rep in repos:
-            print("Searching {}".format(rep))
+            self.logger.info("Searching {}".format(rep))
             for a in knownArtifacts:
-                print("Searching for {}".format(a))
+                self.logger.info("Searching for {}".format(a))
                 releases = rep.getClient().findVersions(a)
-                print("Found {} newer versions".format(len(releases['versions'])))
+                self.logger.info("Found {} newer versions".format(len(releases['versions'])))
                 for version in releases['versions']:
                     try:
                         Artifact.objects.get(groupid=a.groupid, artifactid=a.artifactid, version=version)
-                        print("Artifact and version exists. Doing nothing")
+                        self.logger.info("Artifact and version exists. Doing nothing")
 
                     except Artifact.DoesNotExist:
                         # Artifact missing. Add it
-                        print("Artifact is missing. Create it in database.")
+                        self.logger.info("Artifact is missing. Create it in database.")
                         newArtifact = Artifact(groupid=a.groupid, artifactid=a.artifactid, version=version, repository_id=rep.pk)
                         newArtifact.save()
 

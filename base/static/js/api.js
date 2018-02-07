@@ -1,6 +1,13 @@
 
 
 window.DeployManager = {
+    taskStatus : {
+        "NEW"       : 0,
+        "RUNNING"   : 1,
+        "COMPLETED" : 2,
+        "FAILED"    : 3,
+        "ABORTED"   : 4,
+    },
     deploy : function(artifact, appServer, callback){
 
         console.debug("Deploying "+ artifact + " to server " + appServer);
@@ -39,5 +46,38 @@ window.DeployManager = {
             contentType: "application/json",
             async: false
         });
+    },
+    fullTask : function(taskID){
+        console.debug("Getting fulltask for: "+taskID);
+        return $.ajax({
+            url : "/api/task/fullTask",
+            type: "POST",
+            dataType : "json",
+            data : '{"taskID" : "'+taskID+'"}',
+            contentType: "application/json",
+            async: false
+        }).responseJSON;
+    },
+    logSince : function(taskID, lastLogId){
+        console.debug("Getting logSince for: "+taskID +" and logs sice id: "+lastLogId);
+        return $.ajax({
+            url : "/api/task/logSince",
+            type: "POST",
+            dataType : "json",
+            data : '{"taskID" : "'+taskID+'", "logID" : "'+lastLogId+'"}',
+            contentType: "application/json",
+            async: false
+        }).responseJSON;
+    },
+    status : function(taskID){
+        console.debug("Getting status for: "+taskID);
+        return $.ajax({
+            url : "/api/task/status",
+            type: "POST",
+            dataType : "json",
+            data : '{"taskID" : "'+taskID+'"}',
+            contentType: "application/json",
+            async: false
+        }).responseJSON.status;
     }
 };

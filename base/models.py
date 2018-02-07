@@ -2,6 +2,7 @@
 from distutils.version import StrictVersion
 
 import django
+from django.contrib.auth.models import User
 from django.utils import timezone
 from django.utils.module_loading import import_string
 
@@ -99,4 +100,63 @@ class Deployment(models.Model):
 
     def undeploy(self):
         return self.applicationServer.getClient().undeploy(self.runtimeName)
+
+
+class Task(models.Model):
+
+    NEW = 0
+    RUNNING = 1
+    COMPLETED = 2
+    FAILED = 3
+    ABORTED = 4
+
+    owner = models.ForeignKey(User, on_delete=models.DO_NOTHING)
+    title = models.CharField(max_length=200)
+    status = models.IntegerField(default=0)
+    status_text = models.CharField(max_length=400)
+    started = models.DateTimeField(auto_now=False, auto_now_add=True)
+
+    def __str__(self):
+        return self.title
+
+    def log(self, message):
+        self.status_text = message
+        TaskLog(message=message, task=self).save()
+        return self
+
+    def setStatus(self, status):
+        self.status = status
+        self.save()
+        TaskLog(task=self, message="Status changed to {}".format(status)).save()
+        return self
+
+    def running(self):
+        self.status = Task.RUNNING
+        self.save()
+        TaskLog(task=self, message="Status changed to Running").save()
+        return self
+
+    def complete(self):
+        self.status = Task.COMPLETED
+        self.save()
+        TaskLog(task=self, message="Status changed to Complete").save()
+        return self
+
+    def failed(self):
+        self.status = Task.FAILED
+        self.save()
+        TaskLog(task=self, message="Status changed to Failed").save()
+        return self
+
+    def aborted(self):
+        self.status = Task.ABORTED
+        self.save()
+        TaskLog(task=self, message="Status changed to Aborted").save()
+        return self
+
+
+class TaskLog(models.Model):
+    datetime = models.DateTimeField(auto_now_add=True, auto_now=False)
+    message = models.CharField(max_length=200)
+    task = models.ForeignKey(Task, models.DO_NOTHING)
 
