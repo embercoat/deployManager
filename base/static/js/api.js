@@ -8,6 +8,12 @@ window.DeployManager = {
         "FAILED"    : 3,
         "ABORTED"   : 4,
     },
+    statusFromInt : function(status){
+        for (key in window.DeployManager.taskStatus) {
+            if(window.DeployManager.taskStatus[key] === status)
+                return key;
+        }
+    },
     deploy : function(artifact, appServer, callback){
 
         console.debug("Deploying "+ artifact + " to server " + appServer);

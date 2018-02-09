@@ -38,7 +38,8 @@ class AppServer(View):
         return render(request, "base/applicationServers.html",
                       {
                           "applicationServer" : appServObject,
-                          "deployments" : deployments
+                          "deployments" : deployments,
+                          "taskStatus": True
                       }
                   )
 
@@ -54,5 +55,6 @@ class DeployView(View):
 
         return render(request, "base/deploy.html", {
                         "applicationServers": appServers,
+                        "taskStatus" : True
                      }
         )

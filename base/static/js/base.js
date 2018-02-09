@@ -10,7 +10,8 @@ function deploy(artifact, appServer){
         type: "POST",
         dataType : "json",
         data : '{"artifactPK" : '+artifact+', "appServerPK" : '+appServer+'}',
-        contentType: "application/json"
+        contentType: "application/json",
+        callback : callbackPollUpdates
     });
 }
 

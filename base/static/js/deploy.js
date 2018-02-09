@@ -1,47 +1,8 @@
-function addLogLine(message, date){
-    $(
-        "<li>"+message+"</li>"
-    ).prependTo("#taskLog");
-}
-function pollUpdates(data){
-    console.log(data);
-    var taskID = data.task;
-    fulltask = window.DeployManager.fullTask(taskID);
-    $("#deploymentModal").modal("hide");
-    $("#statusModal").modal();
-    $("#taskLog").empty();
-    $("#deploymentProgressbar").addClass('progress-bar progress-bar-striped progress-bar-animated');
-    $("#statusModalLabel").html("Working...");
-
-    lastLogID = 0;
-    $.each(fulltask.log, function(key, item){
-        addLogLine(item.fields.message);
-        if(item.pk > lastLogID)
-            lastLogID = item.pk
-    });
-    intervalId = setInterval(function(){
-        logSince = window.DeployManager.logSince(taskID, lastLogID);
-        $.each(logSince.log, function(key, item){
-            addLogLine(item.fields.message);
-            if(item.pk > lastLogID)
-                lastLogID = item.pk
-        });
-        if(window.DeployManager.status(taskID) === window.DeployManager.taskStatus.COMPLETED){
-            clearInterval(intervalId);
-            $("#deploymentProgressbar").addClass('bg-success')
-                                       .removeClass('progress-bar-striped')
-                                       .removeClass('progress-bar-animated');
-            $("#statusModalLabel").html("Complete");
-        }
-    }, 2000);
-}
-
-
 function deployArtifact(){
 //id_appServer
     artifactid = $("#modal_artifactid").val();
     appServer = $("#modal_appserver").val();
-    window.DeployManager.deploy(artifactid, appServer, pollUpdates);
+    window.DeployManager.deploy(artifactid, appServer, callbackPollUpdates);
 }
 
 $(document).ready(function(){

@@ -97,7 +97,11 @@ class API(View):
 
             if action == "undeploy":
                 task = Task(title="Undeployment", owner=request.user)
-                response = de.undeploy(body['deployment'], task)
+                task.save()
+                _thread.start_new_thread(de.undeploy, (),
+                                         {"deployment": body['deployment'],
+                                          "task": task})
+                response = { "success" : True, "message" : "undeployment accepted", "task" : task.pk }
 
         if response == {}:
             response = { "success" : False, "message" : "Method does not exist" }
