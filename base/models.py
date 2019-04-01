@@ -35,8 +35,11 @@ class Repository(models.Model):
     type = models.CharField(max_length=50, choices=repoProviders)
     lastScanned = models.DateTimeField(auto_now=True)
 
+
+
     class Meta:
         ordering = ("name", )
+        verbose_name_plural = 'Repositories'
 
     def getClient(self):
         return import_string(self.type)(self.url, self.username, self.password)

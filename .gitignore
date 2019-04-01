@@ -1,2 +1,4 @@
 .idea
 mydatabase
+*.pyc
+*sqlite3
